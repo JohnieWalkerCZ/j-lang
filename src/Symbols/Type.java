@@ -1,9 +1,10 @@
 package main.src.Symbols;
 
 import main.src.Lexer.*;
+import main.src.Keywords;
 
 public class Type extends Word {
-    public int width = 0;
+    public int width;
 
     public Type(String s, int tag, int w) {
         super(s, tag);
@@ -11,10 +12,10 @@ public class Type extends Word {
     }
 
     public static final Type
-            Int = new Type("int", Tag.BASIC, 4),
-            Float = new Type("float", Tag.BASIC, 8),
-            Char = new Type("char", Tag.BASIC, 1),
-            Bool = new Type("bool", Tag.BASIC, 1);
+            Int = new Type(Keywords.INT, Tag.BASIC, 4),
+            Float = new Type(Keywords.FLOAT, Tag.BASIC, 8),
+            Char = new Type(Keywords.CHAR, Tag.BASIC, 1),
+            Bool = new Type(Keywords.BOOL, Tag.BASIC, 1);
 
     public static boolean numeric(Type p) {
         if (p == Type.Char || p == Type.Int || p == Type.Float) return true;

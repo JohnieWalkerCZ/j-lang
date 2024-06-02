@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 
 import main.src.Symbols.*;
+import main.src.Keywords;
 
 public class Lexer {
     public static int line = 1;
@@ -15,11 +16,11 @@ public class Lexer {
     }
 
     public Lexer() {
-        reserve(new Word("if", Tag.IF));
-        reserve(new Word("else", Tag.ELSE));
-        reserve(new Word("while", Tag.WHILE));
-        reserve(new Word("do", Tag.DO));
-        reserve(new Word("break", Tag.BREAK));
+        reserve(new Word(Keywords.IF, Tag.IF));
+        reserve(new Word(Keywords.ELSE, Tag.ELSE));
+        reserve(new Word(Keywords.WHILE, Tag.WHILE));
+        reserve(new Word(Keywords.DO, Tag.DO));
+        reserve(new Word(Keywords.BREAK, Tag.BREAK));
 
         reserve(Word.True);
         reserve(Word.False);
@@ -75,7 +76,7 @@ public class Lexer {
                 readch();
             } while (Character.isDigit(peek));
 
-            if (peek != '.') return new Num(v);
+            if (peek != Keywords.DECIMAL) return new Num(v);
             float x = v;
             float d = 10;
 

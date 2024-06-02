@@ -3,6 +3,7 @@ package main.src.Parser;
 import java.io.*;
 
 import main.src.Inter.Logicals.*;
+import main.src.Keywords;
 import main.src.Lexer.*;
 import main.src.Symbols.*;
 import main.src.Inter.*;
@@ -43,12 +44,12 @@ public class Parser {
     }
 
     Stmt block() throws IOException { // block -> { decls, stmts }
-        match('{');
+        match(Keywords.BLOCK_START);
         Env savedEnv = top;
         top = new Env(top);
         decls();
         Stmt s = stmts();
-        match('}');
+        match(Keywords.BLOCK_END);
         top = savedEnv;
         return s;
     }
@@ -58,7 +59,7 @@ public class Parser {
             Type p = type();
             Token tok = look;
             match(Tag.ID);
-            match(';');
+            match(Keywords.END_STMT_CHAR);
             Id id = new Id((Word) tok, p, used);
             top.put(tok, id);
             used = used + p.width;
@@ -69,21 +70,21 @@ public class Parser {
     Type type() throws IOException {
         Type p = (Type) look;
         match(Tag.BASIC);
-        if (look.tag != '[') return p; // T -> basic
+        if (look.tag != Keywords.ARRAY_START) return p; // T -> basic
         else return dims(p);          // return array type
     }
 
     Type dims(Type p) throws IOException {
-        match('[');
+        match(Keywords.ARRAY_START);
         Token tok = look;
         match(Tag.NUM);
-        match(']');
-        if (look.tag == '[') p = dims(p);
+        match(Keywords.ARRAY_END);
+        if (look.tag == Keywords.ARRAY_START) p = dims(p);
         return new Array(((Num) tok).value, p);
     }
 
     Stmt stmts() throws IOException {
-        if (look.tag == '}') return Stmt.Null;
+        if (look.tag == Keywords.BLOCK_END) return Stmt.Null;
         else return new Seq(stmt(), stmts());
     }
 
@@ -93,11 +94,11 @@ public class Parser {
         Stmt savedStmt;
 
         switch (look.tag) {
-            case ';':
+            case Keywords.END_STMT_CHAR:
                 move();
                 return Stmt.Null;
             case Tag.IF:
-                match(Tag.IF); match('('); x = bool(); match(')');
+                match(Tag.IF); match(Keywords.STMT_OPENING); x = bool(); match(Keywords.STMT_CLOSING);
                 s1 = stmt();
                 if (look.tag != Tag.ELSE) return new If(x, s1);
                 match(Tag.ELSE);
@@ -108,9 +109,9 @@ public class Parser {
                 savedStmt = Stmt.Enclosing;
                 Stmt.Enclosing = whilenode;
                 match(Tag.WHILE);
-                match('(');
+                match(Keywords.STMT_OPENING);
                 x = bool();
-                match(')');
+                match(Keywords.STMT_CLOSING);
                 s1 = stmt();
                 whilenode.init(x, s1);
                 Stmt.Enclosing = savedStmt; // reset Stmt.Enclosing
@@ -122,18 +123,18 @@ public class Parser {
                 match(Tag.DO);
                 s1 = stmt();
                 match(Tag.WHILE);
-                match('(');
+                match(Keywords.STMT_OPENING);
                 x = bool();
-                match(')');
-                match(';');
+                match(Keywords.STMT_CLOSING);
+                match(Keywords.END_STMT_CHAR);
                 donode.init(s1, x);
                 Stmt.Enclosing = savedStmt; // reset Stmt.Enclosing
                 return donode;
             case Tag.BREAK:
                 match(Tag.BREAK);
-                match(';');
+                match(Keywords.END_STMT_CHAR);
                 return new Break();
-            case '{':
+            case Keywords.BLOCK_START:
                 return block();
             default:
                 return assign();
@@ -154,7 +155,7 @@ public class Parser {
             match('=');
             stmt = new SetElem(x, bool());
         }
-        match(';');
+        match(Keywords.END_STMT_CHAR);
         return stmt;
     }
 
@@ -230,10 +231,10 @@ public class Parser {
     Expr factor() throws IOException {
         Expr x = null;
         switch (look.tag) {
-            case '(':
+            case Keywords.STMT_OPENING:
                 move();
                 x = bool();
-                match(')');
+                match(Keywords.STMT_CLOSING);
                 return x;
             case Tag.NUM:
                 x = new Constant(look, Type.Int);
@@ -259,7 +260,7 @@ public class Parser {
                 Id id = top.get(look);
                 if (id == null) error(look.toString() + " undeclared");
                 move();
-                if (look.tag != '[') return id;
+                if (look.tag != Keywords.ARRAY_START) return id;
                 else return offset(id);
         }
     }
@@ -270,17 +271,17 @@ public class Parser {
         Expr t1, t2;
         Expr loc;
         Type type = a.type;
-        match('[');
+        match(Keywords.ARRAY_START);
         i = bool();
-        match(']');
+        match(Keywords.ARRAY_END);
         type = ((Array) type).of;
         w = new Constant(type.width);
         t1 = new Arith(new Token('*'), i, w);
         loc = t1;
-        while (look.tag == '[') { // multi-dimensional I -> [E] I
-            match('[');
+        while (look.tag == Keywords.ARRAY_START) { // multi-dimensional I -> [E] I
+            match(Keywords.ARRAY_START);
             i = bool();
-            match(']');
+            match(Keywords.ARRAY_END);
             type = ((Array) type).of;
             w = new Constant(type.width);
             t1 = new Arith(new Token('*'), i, w);
