@@ -1,6 +1,5 @@
 package main.src.Inter.Stmts;
 
-import main.src.Lexer.*;
 import main.src.Symbols.*;
 import main.src.Inter.*;
 
@@ -21,6 +20,6 @@ public class Set extends Stmt {
     }
 
     public void gen(int b, int a) {
-        emit( id.toString() + " = " expr.gen().toString() );
+        emit( id.toString() + " = " + expr.gen().toString() );
     }
 }
