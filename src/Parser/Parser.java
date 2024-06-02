@@ -136,6 +136,9 @@ public class Parser {
                 return new Break();
             case Keywords.BLOCK_START:
                 return block();
+            case Tag.PRINT:
+                match(Tag.PRINT); match(Keywords.STMT_OPENING); x = factor(); match(Keywords.STMT_CLOSING);
+                return new Print(x);
             default:
                 return assign();
         }

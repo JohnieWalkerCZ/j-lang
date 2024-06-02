@@ -21,6 +21,7 @@ public class Lexer {
         reserve(new Word(Keywords.WHILE, Tag.WHILE));
         reserve(new Word(Keywords.DO, Tag.DO));
         reserve(new Word(Keywords.BREAK, Tag.BREAK));
+        reserve(new Word(Keywords.PRINT, Tag.PRINT));
 
         reserve(Word.True);
         reserve(Word.False);

@@ -22,7 +22,7 @@ public class Node {
 		System.out.print("L" + i + ":");
 	}
 	public void emit( String s ) {
-		System.out.println("\t" + s);
+		System.out.println("\t\t" + s);
 	}
 	
 }
